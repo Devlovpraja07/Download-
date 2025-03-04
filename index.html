@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Download</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #121212;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Download Button */
+        #download-btn {
+            background: linear-gradient(135deg, #ff5722, #ff9800);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #download-btn:hover {
+            background: linear-gradient(135deg, #e64a19, #f57c00);
+        }
+
+        /* Progress Bar */
+        #progress-container {
+            display: none;
+            width: 90%;
+            max-width: 300px;
+            margin: 20px auto;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 25px;
+            background: linear-gradient(135deg, #4caf50, #8bc34a);
+            text-align: center;
+            line-height: 25px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.2s ease-in-out;
+        }
+
+        /* Download History */
+        #history {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .history-item {
+            background: #1e1e1e;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 5px solid #ff9800;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            #download-btn {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>BGMI SMOOTH CONFIG</h2>
+    <button id="download-btn">Download Config</button>
+
+    <div id="progress-container">
+        <div id="progress-bar">0%</div>
+    </div>
+
+    <h3>Download History</h3>
+    <div id="history"></div>
+
+    <script>
+        document.getElementById('download-btn').addEventListener('click', function () {
+            const fileUrl = "https://drive.google.com/file/d/1GqK3Mr255hWNCU3WXNNCD3mBuSZUt5OG/view?usp=drivesdk"; // Change this to your file URL
+            const fileName = "config-file.zip";
+
+            let progressContainer = document.getElementById('progress-container');
+            let progressBar = document.getElementById('progress-bar');
+            let historyDiv = document.getElementById('history');
+
+            progressContainer.style.display = "block";
+            progressBar.style.width = "0%";
+            progressBar.innerText = "0%";
+
+            let fakeProgress = 0;
+            let progressInterval = setInterval(() => {
+                if (fakeProgress >= 100) {
+                    clearInterval(progressInterval);
+                    progressBar.innerText = "Download Complete!";
+                    
+                    // Add to download history
+                    let historyItem = document.createElement("div");
+                    historyItem.classList.add("history-item");
+                    historyItem.innerText = `✔ ${fileName} - Downloaded Successfully`;
+                    historyDiv.appendChild(historyItem);
+
+                    // Trigger actual download
+                    let a = document.createElement("a");
+                    a.href = fileUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    fakeProgress += 5;
+                    progressBar.style.width = fakeProgress + "%";
+                    progressBar.innerText = fakeProgress + "%";
+                }
+            }, 300);
+        });
+    </script>
+
+</body>
+</html>

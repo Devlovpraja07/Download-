@@ -1,135 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Config Download</title>
-    <style>
-        /* General Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #121212;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>10 Surahs - Roman Urdu</title>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
 
-        /* Download Button */
-        #download-btn {
-            background: linear-gradient(135deg, #ff5722, #ff9800);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+    h1 {
+      text-align: center;
+      color: #00ffcc;
+      margin-bottom: 30px;
+    }
 
-        #download-btn:hover {
-            background: linear-gradient(135deg, #e64a19, #f57c00);
-        }
+    .folder {
+      background: #1a1a1a;
+      border: 1px solid #00ffcc;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s ease;
+    }
 
-        /* Progress Bar */
-        #progress-container {
-            display: none;
-            width: 90%;
-            max-width: 300px;
-            margin: 20px auto;
-            background: #333;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+    .folder:hover {
+      background: #222;
+    }
 
-        #progress-bar {
-            width: 0%;
-            height: 25px;
-            background: linear-gradient(135deg, #4caf50, #8bc34a);
-            text-align: center;
-            line-height: 25px;
-            color: white;
-            font-weight: bold;
-            transition: width 0.2s ease-in-out;
-        }
+    .speak-btn {
+      position: absolute;
+      right: 15px;
+      top: 15px;
+      background: #00ffcc;
+      color: black;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-        /* Download History */
-        #history {
-            margin-top: 20px;
-            text-align: left;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .surah-content {
+      display: none;
+      padding: 10px;
+      background: #141414;
+      margin-top: 10px;
+      border-left: 3px solid #00ffcc;
+      border-radius: 5px;
+      line-height: 1.7;
+      user-select: text;
+    }
 
-        .history-item {
-            background: #1e1e1e;
-            padding: 10px;
-            margin: 5px 0;
-            border-left: 5px solid #ff9800;
-            border-radius: 5px;
-            font-size: 14px;
-        }
+    .stop-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            #download-btn {
-                width: 90%;
-            }
-        }
-    </style>
+    @media (max-width: 600px) {
+      .folder {
+        font-size: 16px;
+      }
+
+      .speak-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <h2>BGMI SMOOTH CONFIG</h2>
-    <button id="download-btn">Download Config</button>
+<h1>10 Surah (Roman Urdu)</h1>
+<button class="stop-btn" onclick="stopSpeak()">⏹️ Stop Speech</button>
 
-    <div id="progress-container">
-        <div id="progress-bar">0%</div>
-    </div>
+<!-- Surah Blocks -->
+<div class="folder" onclick="toggleSurah(1)">1. Surah Al-Fatiha
+  <button class="speak-btn" onclick="speak(1, event)">🗣️</button>
+</div>
+<div id="surah1" class="surah-content">
+  <p id="text1">
+    Bismillah hir Rahman nir Raheem. Alhamdu lillaahi Rabbil 'aalameen. Ar-Rahmaanir-Raheem. Maaliki Yawmid-Deen. Iyyaaka na'budu wa lyyaaka nasta'een. Ihdinas-Siraatal-Mustaqeem. Siraatal-lazeena an'amta 'alaihim ghayril-maghdoobi 'alaihim wa lad-daaalleen.
+  </p>
+</div>
 
-    <h3>Download History</h3>
-    <div id="history"></div>
+<div class="folder" onclick="toggleSurah(2)">2. Surah Al-Ikhlas
+  <button class="speak-btn" onclick="speak(2, event)">🗣️</button>
+</div>
+<div id="surah2" class="surah-content">
+  <p id="text2">
+    Bismillah hir Rahman nir Raheem. Qul huwal laahu ahad. Allah hus-Samad. Lam yalid wa lam yoolad. Wa lam yakul-lahu kufuwan ahad.
+  </p>
+</div>
 
-    <script>
-        document.getElementById('download-btn').addEventListener('click', function () {
-            const fileUrl = "https://www.mediafire.com/file/oulf9s8fqgejc1v/game_patch_3.6.0.19588.pak/file"; // Change this to your file URL
-            const fileName = "MINI PAK";
+<div class="folder" onclick="toggleSurah(3)">3. Surah Al-Falaq
+  <button class="speak-btn" onclick="speak(3, event)">🗣️</button>
+</div>
+<div id="surah3" class="surah-content">
+  <p id="text3">
+    Bismillah hir Rahman nir Raheem. Qul a'oozu bi rabbil-falaq. Min sharri maa khalaq. Wa min sharri ghaasiqin iza waqab. Wa min sharrin-naffaa-saati fil 'uqad. Wa min sharri haasidin iza hasad.
+  </p>
+</div>
 
-            let progressContainer = document.getElementById('progress-container');
-            let progressBar = document.getElementById('progress-bar');
-            let historyDiv = document.getElementById('history');
+<div class="folder" onclick="toggleSurah(4)">4. Surah An-Naas
+  <button class="speak-btn" onclick="speak(4, event)">🗣️</button>
+</div>
+<div id="surah4" class="surah-content">
+  <p id="text4">
+    Bismillah hir Rahman nir Raheem. Qul a'oozu bi rabbin naas. Malikin naas. Ilaahin naas. Min sharril waswaasil khannaas. Allazee yuwaswisu fee sudoorin naas. Minal jinnati wan naas.
+  </p>
+</div>
 
-            progressContainer.style.display = "block";
-            progressBar.style.width = "0%";
-            progressBar.innerText = "0%";
+<div class="folder" onclick="toggleSurah(5)">5. Surah Al-Kawthar
+  <button class="speak-btn" onclick="speak(5, event)">🗣️</button>
+</div>
+<div id="surah5" class="surah-content">
+  <p id="text5">
+    Bismillah hir Rahman nir Raheem. Inna a'tainaa kal kawthar. Fasalli li rabbika wanhar. Inna shaani'aka huwal abtar.
+  </p>
+</div>
 
-            let fakeProgress = 0;
-            let progressInterval = setInterval(() => {
-                if (fakeProgress >= 100) {
-                    clearInterval(progressInterval);
-                    progressBar.innerText = "Download Complete!";
-                    
-                    // Add to download history
-                    let historyItem = document.createElement("div");
-                    historyItem.classList.add("history-item");
-                    historyItem.innerText = `✔ ${fileName} - Downloaded Successfully`;
-                    historyDiv.appendChild(historyItem);
+<div class="folder" onclick="toggleSurah(6)">6. Surah Al-Kafirun
+  <button class="speak-btn" onclick="speak(6, event)">🗣️</button>
+</div>
+<div id="surah6" class="surah-content">
+  <p id="text6">
+    Bismillah hir Rahman nir Raheem. Qul yaa ayyuhal kaafiroon. Laa a'budu ma t'abudoon. Wa laa antum 'abidoona maa a'bud. Wa laa ana 'abidum maa 'abattum. Wa laa antum 'abidoona maa a'bud. Lakum deenukum wa liya deen.
+  </p>
+</div>
 
-                    // Trigger actual download
-                    let a = document.createElement("a");
-                    a.href = fileUrl;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                } else {
-                    fakeProgress += 5;
-                    progressBar.style.width = fakeProgress + "%";
-                    progressBar.innerText = fakeProgress + "%";
-                }
-            }, 300);
-        });
-    </script>
+<div class="folder" onclick="toggleSurah(7)">7. Surah Al-Ma'un
+  <button class="speak-btn" onclick="speak(7, event)">🗣️</button>
+</div>
+<div id="surah7" class="surah-content">
+  <p id="text7">
+    Ara'aytal lazee yukazzibu bid-deen. Fa zaalikal lazee yadu'ul-yateem. Wa laa yahuddu 'alaa ta'aamil miskeen. Fa wailul-lil musalleen. Allazeena hum 'an salaatihim saahoon. Allazeena hum yuraaa'oon. Wa yamna'oonal ma'oon.
+  </p>
+</div>
 
+<div class="folder" onclick="toggleSurah(8)">8. Surah Quraysh
+  <button class="speak-btn" onclick="speak(8, event)">🗣️</button>
+</div>
+<div id="surah8" class="surah-content">
+  <p id="text8">
+    Li-ee-laafi quraish. Ee-laafihim rihlatash shitaa'i was-saif. Fal-ya'budoo rabba haazal-bait. Allazeee at'amahum min joo'inw-wa-aamanahum min khawf.
+  </p>
+</div>
+
+<div class="folder" onclick="toggleSurah(9)">9. Surah Al-Masad
+  <button class="speak-btn" onclick="speak(9, event)">🗣️</button>
+</div>
+<div id="surah9" class="surah-content">
+  <p id="text9">
+    Tabbat yadaa abee Lahabinw-wa tabb. Maa aghnaa 'anhu maaluhu wa maa kasab. Sa-yaslaa naaran zaata lahab. Wamra-atuhu hamma latal-hatab. Fee jeediha hablum mim-masad.
+  </p>
+</div>
+
+<div class="folder" onclick="toggleSurah(10)">10. Surah Al-Asr
+  <button class="speak-btn" onclick="speak(10, event)">🗣️</button>
+</div>
+<div id="surah10" class="surah-content">
+  <p id="text10">
+    Wal 'asr. Innal insaana lafee khusr. Illal lazeena aamanoo wa 'amilus saalihaati wa tawaasaw bil haqqi wa tawaasaw bis sabr.
+  </p>
+</div>
+
+<script>
+  let currentUtterance = null;
+  const synth = window.speechSynthesis;
+  const stopBtn = document.querySelector('.stop-btn');
+
+  function toggleSurah(num) {
+    const content = document.getElementById("surah" + num);
+    const all = document.querySelectorAll('.surah-content');
+    all.forEach(el => el.style.display = el === content ? 
+      (content.style.display === 'block' ? 'none' : 'block') : 
+      'none'
+    );
+  }
+
+  function speak(num, event) {
+    event.stopPropagation();
+    stopSpeak();
+    
+    const text = document.getElementById(`text${num}`).textContent;
+    currentUtterance = new SpeechSynthesisUtterance(text);
+    
+    currentUtterance.onstart = () => stopBtn.style.display = 'block';
+    currentUtterance.onend = () => stopBtn.style.display = 'none';
+    
+    synth.speak(currentUtterance);
+  }
+
+  function stopSpeak() {
+    if (synth.speaking) {
+      synth.cancel();
+      stopBtn.style.display = 'none';
+    }
+  }
+
+  document.querySelectorAll('.surah-content').forEach(content => {
+    content.addEventListener('mouseup', handleTextSelection);
+    content.addEventListener('touchend', handleTextSelection);
+  });
+
+  function handleTextSelection(event) {
+    const selection = window.getSelection();
+    if (selection.toString().trim()) {
+      event.stopPropagation();
+      stopSpeak();
+      
+      const utterance = new SpeechSynthesisUtterance(selection.toString());
+      utterance.onstart = () => stopBtn.style.display = 'block';
+      utterance.onend = () => stopBtn.style.display = 'none';
+      
+      synth.speak(utterance);
+    }
+  }
+</script>
 </body>
 </html>

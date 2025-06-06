@@ -1,31 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple React Website</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script crossorigin src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      background: #f0f0f0;
-      margin: 0;
-    }
-    #root {
-      background: white;
-      padding: 2rem;
-      max-width: 600px;
-      margin: auto;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do File React App</title>
+    <!-- React, ReactDOM aur Babel ke CDNs -->
+    <!-- React Core Library -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <!-- ReactDOM Library (React components ko DOM mein render karne ke liye) -->
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel Standalone (browser mein JSX ko JavaScript mein compile karne ke liye) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            color: #333;
+        }
+        #root {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1, h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .counter-section p {
+            font-size: 3em;
+            margin: 15px 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"] {
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+            font-size: 1em;
+        }
+        .input-section p {
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #6c757d;
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" src="App.js"></script>
+    <div id="root"></div>
+
+    <!-- Aapki React component code wali file -->
+    <!-- type="text/babel" attribute bahut zaroori hai Babel ko batane ke liye ki is script mein JSX hai -->
+    <script type="text/babel" src="app.js"></script>
 </body>
 </html>
